@@ -47,7 +47,9 @@ function AuthForm({ onAuth }: { onAuth: (user: { id: string; email: string; user
         if (data.user) onAuth({ id: data.user.id, email, username: uname });
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const msg = err instanceof Error ? err.message : JSON.stringify(err);
+      setError(msg);
+      console.error("Auth error:", err);
     } finally {
       setLoading(false);
     }
