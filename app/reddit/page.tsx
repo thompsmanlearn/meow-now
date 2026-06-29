@@ -10,44 +10,37 @@ interface RedditPost {
   subreddit: string;
 }
 
-async function fetchSubreddit(name: string): Promise<RedditPost[]> {
+const SUPABASE_URL = "https://cihbfubghytzqrpffgcq.supabase.co";
+const SUPABASE_ANON = "sb_publishable_Z7aAkdc4TUJMxO-mV-8dGw_2zcgObTR";
+
+async function getPostsForSubreddit(name: string): Promise<RedditPost[]> {
   try {
+    const params = new URLSearchParams({
+      subreddit: `eq.${name}`,
+      order: "score.desc",
+      limit: "24",
+    });
     const res = await fetch(
-      `https://www.reddit.com/r/${name}/hot.json?limit=50`,
+      `${SUPABASE_URL}/rest/v1/reddit_posts?${params}`,
       {
-        headers: { "User-Agent": "MeowNow/1.0 (cat photo site)" },
-        next: { revalidate: 1800 },
+        headers: {
+          apikey: SUPABASE_ANON,
+          Authorization: `Bearer ${SUPABASE_ANON}`,
+        },
+        next: { revalidate: 300 },
       }
     );
     if (!res.ok) return [];
-    const data = await res.json();
-
-    return (data.data.children as { data: Record<string, unknown> }[])
-      .map((c) => c.data)
-      .filter((p) => {
-        const hint = p.post_hint as string | undefined;
-        const preview = p.preview as { images?: { source?: { url?: string } }[] } | undefined;
-        if (hint === "image") return true;
-        if (preview?.images?.[0]?.source?.url) return true;
-        return false;
-      })
-      .map((p) => {
-        const preview = p.preview as { images?: { source?: { url?: string } }[] } | undefined;
-        let imageUrl = p.url as string;
-        if (preview?.images?.[0]?.source?.url) {
-          imageUrl = preview.images[0].source!.url!.replace(/&amp;/g, "&");
-        }
-        return {
-          id: p.id as string,
-          title: p.title as string,
-          imageUrl,
-          score: p.score as number,
-          author: p.author as string,
-          permalink: `https://reddit.com${p.permalink as string}`,
-          subreddit: p.subreddit as string,
-        };
-      })
-      .slice(0, 24);
+    const rows: { id: string; title: string; image_url: string; score: number; author: string; permalink: string; subreddit: string }[] = await res.json();
+    return rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      imageUrl: r.image_url,
+      score: r.score,
+      author: r.author,
+      permalink: r.permalink,
+      subreddit: r.subreddit,
+    }));
   } catch {
     return [];
   }
@@ -55,9 +48,9 @@ async function fetchSubreddit(name: string): Promise<RedditPost[]> {
 
 export default async function RedditPage() {
   const [cats, smol, catpictures] = await Promise.all([
-    fetchSubreddit("cats"),
-    fetchSubreddit("IllegallySmolCats"),
-    fetchSubreddit("catpictures"),
+    getPostsForSubreddit("cats"),
+    getPostsForSubreddit("IllegallySmolCats"),
+    getPostsForSubreddit("catpictures"),
   ]);
 
   const subreddits = [
