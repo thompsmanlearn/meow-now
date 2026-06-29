@@ -1,4 +1,5 @@
 import Link from "next/link";
+import RefreshButton from "./RefreshButton";
 
 interface Article {
   title: string;
@@ -23,7 +24,7 @@ async function fetchNews(query: string, pageSize = 12): Promise<Article[]> {
     });
     const res = await fetch(
       `https://newsapi.org/v2/everything?${params}`,
-      { next: { revalidate: 3600 } }
+      { next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -94,7 +95,8 @@ export default async function NewsPage() {
       <section className="mb-16">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-stone-800 mb-2">📰 Cat News</h1>
-          <p className="text-stone-500">The latest cat stories from around the world, updated hourly.</p>
+          <p className="text-stone-500">The latest cat stories from around the world, updated every 5 minutes.</p>
+          <div className="mt-3"><RefreshButton /></div>
         </div>
         {catNews.length === 0 ? (
           <div className="text-center py-16 text-stone-400">
