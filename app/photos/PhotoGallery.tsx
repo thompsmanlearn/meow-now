@@ -19,7 +19,8 @@ export default function PhotoGallery({ initial }: { initial: CatImage[] }) {
     setLoading(true);
     try {
       const res = await fetch(
-        "https://api.thecatapi.com/v1/images/search?limit=24"
+        `https://api.thecatapi.com/v1/images/search?limit=24&_=${Date.now()}`,
+        { cache: "no-store" }
       );
       if (res.ok) {
         const data: CatImage[] = await res.json();
@@ -34,9 +35,9 @@ export default function PhotoGallery({ initial }: { initial: CatImage[] }) {
     <>
       {/* Grid */}
       <div className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-3">
-        {photos.map((img) => (
+        {photos.map((img, i) => (
           <div
-            key={img.id + Math.random()}
+            key={img.id + i}
             className="cat-card break-inside-avoid cursor-pointer rounded-xl overflow-hidden shadow bg-stone-200"
             onClick={() => setLightbox(img)}
           >
