@@ -5,6 +5,7 @@ const nav = [
   { href: "/videos", label: "Videos" },
   { href: "/facts", label: "Facts & Care" },
   { href: "/news", label: "News" },
+  { href: "/wiki", label: "Wiki" },
   { href: "/community", label: "Community" },
 ];
 
