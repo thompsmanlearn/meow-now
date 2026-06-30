@@ -1,4 +1,5 @@
 import VideoGrid from "./VideoGrid";
+import RefreshButton from "./RefreshButton";
 
 interface YTItem {
   id: { videoId: string };
@@ -25,7 +26,7 @@ async function getFunnyCatVideos() {
     });
     const res = await fetch(
       `https://www.googleapis.com/youtube/v3/search?${params}`,
-      { next: { revalidate: 86400 } }
+      { next: { revalidate: 3600 } }
     );
     if (!res.ok) return [];
     const data = await res.json();
@@ -50,8 +51,9 @@ export default async function VideosPage() {
         <h1 className="text-3xl font-bold text-stone-800 mb-2">🎬 Funny Cat Videos</h1>
         <p className="text-stone-500">
           The best cat videos on YouTube — click any thumbnail to watch right here.
-          Updated daily.
+          Updated hourly.
         </p>
+        <div className="mt-3"><RefreshButton /></div>
       </div>
 
       {videos.length === 0 ? (
